@@ -14,9 +14,10 @@
   </header>
   <main>
     <nav class="screen-nav" aria-label="Màn hình trò chơi">
-      <button id="preparation-nav" class="screen-link" aria-current="page">01 / Chuẩn bị</button>
-      <button id="battle-nav" class="screen-link" disabled>02 / Chiến đấu</button>
-      <button id="gacha-nav" class="screen-link" disabled>03 / Chiêu mộ</button>
+      <button id="preparation-nav" class="screen-link" aria-current="page">01 / Chuẩn bị đội hình</button>
+      <button id="inventory-nav" class="screen-link" disabled>02 / Túi đồ</button>
+      <button id="battle-nav" class="screen-link" disabled>03 / Chọn trận & Chiến đấu</button>
+      <button id="gacha-nav" class="screen-link" disabled>04 / Chiêu mộ</button>
       <span id="coin-balance" class="badge wallet" role="status">0 coin</span>
     </nav>
     <p id="notice" class="screen-notice" role="status" aria-live="polite">Sẵn sàng.</p>
@@ -28,7 +29,7 @@
       <p id="selected-slot" class="selected-slot" aria-live="polite"></p>
       <section id="character-menu" class="character-menu" aria-label="Menu chọn nhân vật và xem kỹ năng">
         <aside class="roster-panel" aria-labelledby="roster-title">
-          <div class="section-heading"><div><span class="eyebrow">TÌM HIỂU ĐỒNG ĐỘI</span><h3 id="roster-title">Danh sách nhân vật</h3></div></div>
+          <div class="section-heading"><div><span class="eyebrow">TÌM HIỂU ĐỒNG ĐỘI</span><h3 id="roster-title" tabindex="-1">Danh sách nhân vật</h3></div></div>
           <label>Tìm nhân vật<input id="roster-search" type="search" placeholder="Tên, danh hiệu, vai trò…" autocomplete="off"></label>
           <div class="roster-filters">
             <label>Nguyên tố<select id="roster-element"><option value="">Tất cả hệ</option></select></label>
@@ -42,14 +43,62 @@
         </aside>
         <section id="preview-details" class="preview-details" aria-label="Thông tin và kỹ năng nhân vật"></section>
       </section>
+      <div class="story"><div><h3>Arthur · Kiểm soát Ogre’s Bane</h3><p id="story-description">Mốc truyện thử nghiệm: hoàn thành luyện kiếm để đổi nội tại kỹ năng và mở Giải phóng một phần.</p></div><button id="training" disabled>Hoàn thành luyện kiếm</button></div>
+      <div class="save-controls"><button id="save" disabled>Lưu tiến trình</button><button id="load" disabled>Tải tiến trình</button><button id="export-save" disabled>Export · Xuất save</button><button id="import-save" disabled>Import · Nhập save</button><input id="import-save-file" type="file" accept=".json,application/json" aria-label="Chọn file save JSON để nhập" hidden></div>
+      <p class="preview-note">Xuất file JSON để sao lưu hoặc chuyển máy. Nhập file sẽ thay thế toàn bộ tiến trình sau khi bạn xác nhận; không lưu trận đang đánh.</p>
+    </section>
+
+    <section id="inventory-screen" class="panel inventory-panel" aria-labelledby="inventory-title" hidden>
+        <div class="section-heading"><div><span class="eyebrow">02 / TÚI ĐỒ</span><h2 id="inventory-title" tabindex="-1">Túi đồ</h2></div><span id="inventory-count" class="badge"></span></div>
+        <p id="inventory-target" class="muted"></p>
+        <button id="inventory-change-character">↑ Chọn nhân vật khác</button>
+        <div class="inventory-layout">
+          <div>
+            <div class="inventory-filters">
+              <label>Loại gear<select id="inventory-tier"><option value="">Tất cả loại</option></select></label>
+              <label>Chỉ số<select id="inventory-stat"><option value="">Tất cả chỉ số</option></select></label>
+              <label>Trạng thái<select id="inventory-status"><option value="">Tất cả gear</option><option value="free">Chưa trang bị</option><option value="equipped">Đang trang bị</option></select></label>
+            </div>
+            <p id="inventory-empty" class="muted" role="status"></p>
+            <div id="inventory-grid" class="inventory-grid" role="group" aria-label="Gear trong túi đồ"></div>
+          </div>
+          <section id="inventory-details" class="inventory-details" aria-label="So sánh và trang bị gear"></section>
+        </div>
+      </section>
+
+    <section id="battle-screen" aria-labelledby="battle-page-title" hidden>
+    <section class="panel encounter-panel" aria-labelledby="battle-page-title">
+      <div class="section-heading"><div><span class="eyebrow">03 / CHỌN TRẬN & CHIẾN ĐẤU</span><h2 id="battle-page-title" tabindex="-1">Chọn trận & Chiến đấu</h2></div></div>
+      <p id="battle-party-summary" class="muted"></p>
       <div class="setup-controls"><label>Cuộc chạm trán<select id="encounter"></select></label><button id="start" class="primary" disabled>Bắt đầu trận</button></div>
       <p id="encounter-description" class="muted"></p>
-      <div class="story"><div><h3>Arthur · Kiểm soát Ogre’s Bane</h3><p id="story-description">Mốc truyện thử nghiệm: hoàn thành luyện kiếm để đổi nội tại kỹ năng và mở Giải phóng một phần.</p></div><button id="training" disabled>Hoàn thành luyện kiếm</button></div>
-      <div class="save-controls"><button id="save" disabled>Lưu tiến trình</button><button id="load" disabled>Tải tiến trình</button></div>
+      <p id="battle-placeholder" class="muted">Chọn cuộc chạm trán rồi bấm Bắt đầu trận.</p>
+    </section>
+    <div id="battle-session" hidden>
+    <div class="battle-toolbar"><button id="back-to-preparation">← Chuẩn bị đội hình</button><button id="claim-reward" hidden>Nhận thưởng chiến thắng</button><span class="muted">Bạn có thể trở lại chuẩn bị rồi tiếp tục trận hiện tại.</span></div>
+    <section class="battle-layout" aria-label="Màn thử chiến đấu">
+      <div class="panel battlefield">
+        <div class="section-heading"><div><span class="eyebrow">TRẬN HIỆN TẠI</span><h2 id="battle-title" tabindex="-1">Rừng biên giới</h2></div><span id="round" class="badge">Chưa bắt đầu</span></div>
+        <div id="empty-battle" class="empty-battle"><span class="crest">✦</span><p>Chọn đồng đội và bắt đầu một cuộc chạm trán.</p><small>Light · Dark · Những mảnh Prisma</small></div>
+        <div id="enemies" class="combat-row enemy-row"></div>
+        <div id="turn-order" class="turn-order"></div>
+        <div id="allies" class="combat-row"></div>
+        <div id="battle-result" role="status" aria-live="polite"></div>
+      </div>
+      <aside class="panel command-panel">
+        <span class="eyebrow">HÀNH ĐỘNG</span><h2 id="actor-title">Chờ xuất phát</h2>
+        <p id="actor-description" class="muted">Đánh thường không tốn MP. Phòng thủ giúp chờ thời điểm thuận lợi.</p>
+        <div id="abilities" class="abilities"></div>
+        <div id="target-controls" hidden><label>Mục tiêu<select id="target"></select></label><button id="execute" class="primary">Thực hiện</button></div>
+        <p id="action-help" class="muted"></p>
+      </aside>
+    </section>
+    <section class="panel log-panel" aria-labelledby="log-title"><div class="section-heading"><h2 id="log-title">Nhật ký chiến đấu</h2><span class="muted">Mới nhất ở cuối</span></div><ol id="log" aria-live="polite" aria-relevant="additions"></ol></section>
+    </div>
     </section>
 
     <section id="gacha-screen" class="panel" aria-labelledby="gacha-title" hidden>
-      <div class="section-heading"><div><span class="eyebrow">03 / CHIÊU MỘ</span><h2 id="gacha-title" tabindex="-1">Tiếng gọi Prisma</h2></div><span id="gacha-progress" class="badge"></span></div>
+      <div class="section-heading"><div><span class="eyebrow">04 / CHIÊU MỘ</span><h2 id="gacha-title" tabindex="-1">Tiếng gọi Prisma</h2></div><span id="gacha-progress" class="badge"></span></div>
       <p id="banner-description" class="muted"></p>
       <label>Banner<select id="banner-select"></select></label>
       <div class="gacha-actions"><button id="pull-one" class="primary" disabled>Quay 1 lần</button><button id="pull-ten" class="primary" disabled>Quay 10 lần</button></div>
@@ -58,28 +107,6 @@
       <section aria-labelledby="gacha-results-title"><h3 id="gacha-results-title">Kết quả lượt quay gần nhất</h3><p id="gacha-result-summary" role="status" aria-live="polite">Chưa quay trong phiên này.</p><div id="gacha-results" class="gacha-results"></div></section>
       <section class="recruit-panel" aria-labelledby="recruit-title"><h3 id="recruit-title">Mảnh chiêu mộ</h3><p id="recruit-help" class="muted"></p><div class="setup-controls"><label>Chọn nhân vật chưa sở hữu<select id="recruit-character"></select></label><button id="recruit" disabled>Chiêu mộ</button></div></section>
       <p id="gear-summary" class="muted"></p>
-    </section>
-
-    <section id="battle-screen" aria-label="Màn hình chiến đấu" hidden>
-    <div class="battle-toolbar"><button id="back-to-preparation">← Chuẩn bị đội hình</button><button id="claim-reward" hidden>Nhận thưởng chiến thắng</button><span class="muted">Bạn có thể trở lại chuẩn bị rồi tiếp tục trận hiện tại.</span></div>
-    <section class="battle-layout" aria-label="Màn thử chiến đấu">
-      <div class="panel battlefield">
-        <div class="section-heading"><div><span class="eyebrow">02 / CHIẾN ĐẤU</span><h2 id="battle-title" tabindex="-1">Rừng biên giới</h2></div><span id="round" class="badge">Chưa bắt đầu</span></div>
-        <div id="empty-battle" class="empty-battle"><span class="crest">✦</span><p>Chọn đồng đội và bắt đầu một cuộc chạm trán.</p><small>Light · Dark · Những mảnh Prisma</small></div>
-        <div id="enemies" class="combat-row enemy-row"></div>
-        <div id="turn-order" class="turn-order"></div>
-        <div id="allies" class="combat-row"></div>
-        <div id="battle-result" role="status" aria-live="polite"></div>
-      </div>
-      <aside class="panel command-panel">
-        <span class="eyebrow">03 / HÀNH ĐỘNG</span><h2 id="actor-title">Chờ xuất phát</h2>
-        <p id="actor-description" class="muted">Đánh thường không tốn MP. Phòng thủ giúp chờ thời điểm thuận lợi.</p>
-        <div id="abilities" class="abilities"></div>
-        <div id="target-controls" hidden><label>Mục tiêu<select id="target"></select></label><button id="execute" class="primary">Thực hiện</button></div>
-        <p id="action-help" class="muted"></p>
-      </aside>
-    </section>
-    <section class="panel log-panel" aria-labelledby="log-title"><div class="section-heading"><h2 id="log-title">Nhật ký chiến đấu</h2><span class="muted">Mới nhất ở cuối</span></div><ol id="log" aria-live="polite" aria-relevant="additions"></ol></section>
     </section>
     <footer>Bản mẫu kiểm tra hệ thống · Các chỉ số đang phục vụ thử nghiệm, chưa phải cân bằng cuối cùng.</footer>
   </main>

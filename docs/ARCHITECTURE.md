@@ -29,13 +29,15 @@ Story flags ghi lại sự kiện; upgrade IDs ghi lại kết quả phát tri�
 
 ## Menu nhân vật và skill preview
 
+UI có bốn screen ngang hàng trong `main`: `preparation-screen`, `inventory-screen`, `battle-screen`, `gacha-screen`. `showScreen` chỉ ẩn/hiện, cập nhật tab/focus; không reset campaign hoặc trận. Trang Chuẩn bị chứa roster/preview/truyện/save. Nút túi đồ trong preview gọi callback điều hướng sang trang Túi đồ, dùng cùng character ID; nút đổi nhân vật trở lại roster. Chọn trận nằm trong `battle-screen`, luôn truy cập được khi chưa có trận. `battle-session` chỉ hiện sau khi bắt đầu. Tab trận giữ tên cố định, kết quả nằm trong nội dung trang.
+
 `src/ui/roster-menu.js` quản lý vị trí đang chọn, nhân vật đang xem, tìm kiếm, bộ lọc và giả định hệ số. Đây là state giao diện, không phải campaign state. Chọn thẻ chỉ đổi preview; bấm xác nhận mới gọi hàm thuần trong `src/core/party.js` để thay thế hoặc hoán đổi. Nhân vật mới được đọc từ `content.characters`, không cần thêm option thủ công. `roleGroup` là ID ổn định dùng lọc, tách khỏi tên vai trò hiển thị.
 
-Party cho phép 1–4 phần tử, mỗi phần tử là ID hoặc `null` cho ô trống. Không được toàn bộ trống hoặc trùng ID. Save v1 cũ có mảng ID liên tiếp vẫn chuyển đổi được; save v2 giữ vị trí trống bằng `null`. Engine chỉ tạo battle actor cho những vị trí có người, theo thứ tự đội hình, và từ chối nhân vật chưa sở hữu.
+Party cho phép 1–4 phần tử, mỗi phần tử là ID hoặc `null` cho ô trống. Không được toàn bộ trống hoặc trùng ID. Save v1/v2 cũ vẫn chuyển đổi được; save v3 giữ vị trí trống bằng `null`. Engine chỉ tạo battle actor cho những vị trí có người, theo thứ tự đội hình, và từ chối nhân vật chưa sở hữu.
 
 Skill preview lấy definition đã resolve nâng cấp, duyệt effects và statuses để sinh hệ số. `src/core/combat-math.js` cung cấp `damageMultiplier` và `supportAmount` cho cả engine lẫn preview, đặc biệt giữ đúng thứ tự làm tròn Cấp cứu: 70 HP thường → 112 HP khi nguy cấp. Các thanh giả định chỉ tác động vào cách xem, không thay tài nguyên, HP hay số mảnh thực tế.
 
-Nội tại `stat_boost` được resolve thành chỉ số chuẩn bị trong `stats`, đồng thời giữ `baseStats` của nhân vật để tránh cộng hai lần. `effectiveStat` tính chỉ số trong trận bằng `base × (1 + permanent modifier + temporary modifiers)`, có cùng mức sàn như trước. Ví dụ Lisbeth: 42 MAG gốc, +20% nội tại → 50,4; thêm +50% tự buff → 71,4. Không nhân buff tạm thời lần nữa lên 50,4. Các snapshot chỉ số này không được đưa vào campaign save.
+Gear được cộng vào bản clone chỉ số trước khi resolve nội tại. Nội tại `stat_boost` được resolve thành chỉ số chuẩn bị trong `stats`, đồng thời giữ `baseStats` (nền đã gồm gear) để tránh cộng hai lần. `effectiveStat` tính chỉ số trong trận bằng `(gốc + gear) × (1 + permanent modifier + temporary modifiers)`, có cùng mức sàn như trước. Ví dụ Lisbeth: 42 MAG gốc, gear +5 → nền 47; nội tại +20% → 56,4; thêm +50% tự buff → 79,9. Các snapshot và `gearBonuses` không được đưa vào campaign save.
 
 Preview sát thương chỉ hiển thị hệ số trước DEF/RES, nguyên tố và buff trong trận. Hồi/khiên dùng MAG trong definition chuẩn bị; regen theo phần trăm HP tối đa ghi rõ chỉ số thuộc người nhận. Duration status luôn ghi theo lượt người nhận, cooldown theo vòng chung.
 
@@ -90,7 +92,7 @@ Damage event có `element` và `weakness` để giao diện hoặc hệ thống 
 
 ## Save và thay đổi dữ liệu
 
-Save version 2 không chứa bản sao toàn bộ definition. Khi tải, resolve lại từ nội dung hiện tại, giữ upgrade ID đã nhận. Vì vậy sửa số cân bằng sẽ có hiệu lực ở trận mới.
+Save version 3 không chứa bản sao toàn bộ definition. Khi tải, resolve lại từ nội dung hiện tại, giữ upgrade ID đã nhận. Vì vậy sửa số cân bằng sẽ có hiệu lực ở trận mới.
 
 - Thêm nhân vật mới: save cũ được thêm state mặc định khi tải, nhưng không tự mở khóa. Quyền sở hữu nằm trong `unlockedCharacterIds`, tách khỏi `characters` dùng cho tiến trình/preview.
 - Thêm upgrade: các cờ đủ điều kiện được đối chiếu lại khi tải.
@@ -100,13 +102,17 @@ Save version 2 không chứa bản sao toàn bộ definition. Khi tải, resolve
 
 Không có cloud save hoặc tính chống gian lận. Lưu trữ trình duyệt là adapter của bản mẫu, có thể thay bằng file/backend mà không đổi core.
 
-## Sở hữu và kinh tế v2
+`src/core/save-file.js` đóng gói Export/Import JSON trên cùng serializer/validator. Export chuẩn hóa campaign rồi tạo JSON dễ đọc, tên file có version và timestamp UTC; không chứa battle hoặc state UI. Import nhận JSON thuần, chấp nhận BOM UTF-8, giới hạn 10 MB theo byte UTF-8, hỗ trợ migration v1/v2 → v3, kể cả v2 cũ chưa có equipment.
+
+UI đọc file và validate trước khi hiện tóm tắt xác nhận thay thế. Trong lúc đọc, khóa hành động/điều hướng và đặt các màn chuẩn bị/túi đồ/gacha ở trạng thái inert để không thay tiến trình giữa giao dịch. Sau xác nhận, ghi localStorage trước rồi mới thay campaign, đóng trận và xóa kết quả gacha tạm. Không merge coin/đồ/quyền sở hữu. Hủy chọn, hủy xác nhận, lỗi đọc/JSON/schema/tham chiếu hoặc lỗi lưu không đổi tiến trình/trận hiện có. File export dùng Blob/object URL, thu hồi URL sau khi kích hoạt tải.
+
+## Sở hữu và kinh tế v3
 
 `campaign.unlockedCharacterIds` là quyền sở hữu, độc lập với state tiến trình `characters`. Ban đầu chỉ có sáu nhân vật được khai báo trong `economy.default.starterCharacters`. UI vẫn resolve nhân vật khóa để xem preview. Xếp đội truyền campaign vào `assignPartySlot`; `createBattle` và bộ tải save đều kiểm tra quyền sở hữu.
 
-Save v2 bổ sung `coins`, `recruitmentShards`, `gear` và `gacha.totalPulls`. Gear là instance `{id,typeId,stats}`; `gear_N` dùng số thứ tự lượt quay để giữ ID riêng qua save/load. Kiểm tra số nguyên an toàn, ID duy nhất, số chỉ số và giá trị khớp loại gear. Gear chưa tác động chỉ số chiến đấu.
+Save v3 lưu `coins`, `recruitmentShards`, `gear`, `equipment`, `extraGearSlots` và `gacha.totalPulls`. Gear là instance `{id,typeId,stats}`; `gear_N` dùng số thứ tự lượt quay để giữ ID riêng qua save/load. `equipment` ánh xạ character ID → mảng gear ID/null giữ vị trí; `extraGearSlots` lưu số ô mở thêm (0–3) theo người. Số ô mặc định/tối đa lấy từ economy (3/6). Kiểm tra giá trị gear, ID duy nhất, giới hạn ô và quyền sở hữu. Migration v2 đưa gear đơn vào ô đầu tiên, thiếu equipment đọc thành `{}`; không đoán dupe cũ từ mảnh chung.
 
-Migration v1 giữ story/upgrades/victories, chỉ mở starter, đổi vị trí nhân vật khóa thành null; nếu không còn ai thì dùng đội mặc định. Cấp bù `victories × victoryCoins` một lần. UI ưu tiên key `northern-prisma.campaign.v2`, chỉ dùng key v1 khi chưa có v2; ghi v2 sau migration và không xóa v1. Không tự chuyển sang bản v1 khi một bản v2 tồn tại nhưng bị lỗi.
+Migration v1 giữ story/upgrades/victories, chỉ mở starter, đổi vị trí nhân vật khóa thành null; nếu không còn ai thì dùng đội mặc định. Cấp bù `victories × victoryCoins` một lần. UI ưu tiên key `northern-prisma.campaign.v3`, rồi v2, rồi v1 khi chưa có bản mới hơn; ghi v3 sau migration và giữ các bản cũ. Không tự fallback khi bản mới hơn tồn tại nhưng bị lỗi.
 
 `claimBattleReward` tạo campaign mới, gọi adapter persist trước rồi đánh dấu `battle.rewardClaimed`. Gọi lại trên cùng trận không cấp thêm thưởng. Lỗi persist giữ claim chưa nhận để thử lại; UI chặn bắt đầu trận mới khi còn thưởng chờ ghi.
 
@@ -114,10 +120,18 @@ Migration v1 giữ story/upgrades/victories, chỉ mở starter, đổi vị tr�
 
 Gacha dùng `Math.random` riêng; không dùng seed cố định của trận thử. Các hàm nhận RNG qua tham số để kiểm thử biên tỷ lệ. UI lưu toàn bộ kết quả trước khi thay campaign và hiển thị: lỗi ghi không tiêu coin hoặc cấp thưởng một phần. Kết quả lượt gần nhất là state giao diện, còn đồ/nhân vật/mảnh/tổng lượt là state bền vững.
 
+## Trang bị và túi đồ
+
+`src/core/equipment.js` có các lệnh thuần `equipGear`/`unequipGear` nhận slot index (mặc định 0), truy vấn `gearLocation`/`gearOwner`/`equippedGear`. Mỗi người có 3 ô mặc định, mỗi dupe mở thêm 1 ô cho chính người đó, đến 6; vẫn nhận mảnh sau khi đủ ô. Thay gear trả món cũ về túi; chuyển giữa ô hoặc người để trống ô nguồn. Không xóa/reroll/sao chép instance. Kiểm tra khi tải save, bắt đầu trận và trước đổi trang bị; cấm ô khóa, gear thiếu và gear lặp trong hoặc giữa các nhân vật.
+
+`resolveCharacter` cộng tổng flat stats của mọi món đang mặc lên definition clone, sau nâng cấp truyện và trước nội tại %. HP/MP tăng trực tiếp các maximum; battle khởi tạo ở maximum mới. MAG tác động damage/hồi/khiên, MP tối đa ảnh hưởng Aurora, SPD ảnh hưởng thứ tự vòng. Không tính phần trăm lên phần trăm đã resolve. Save chỉ giữ ID gear và map equipment, không giữ chỉ số đã tính.
+
+`src/ui/inventory-menu.js` bám theo nhân vật đang xem trong roster, kể cả khi không nằm trong đội. Bộ lọc và gear đang chọn là state UI. Chọn món chỉ so sánh đủ bảy chỉ số sau nội tại, không sửa campaign. Xác nhận equip/tháo/chuyển gọi cùng adapter commit của gacha: ghi save trước khi thay state, lỗi lưu giữ nguyên trang bị. Nhân vật khóa không có thao tác equip. Trận đang chơi là snapshot độc lập, chỉ trận mới dùng đồ mới.
+
 ## Hướng phát triển tiếp
 
 1. Thêm campaign scene/quest layer để phát story event từ hội thoại hoặc nhiệm vụ thật.
-2. Thêm túi đồ và equipment trên dữ liệu gear đã quay được; resolve modifier trang bị trước khi tạo battle actor.
+2. Bổ sung nâng cấp/bán/tháo rã gear nếu vòng lặp kinh tế cần; loại ô hoặc giới hạn theo nghề cần schema và quy tắc rõ ràng.
 3. Thêm XP/growth có dữ liệu và quy tắc tăng cấp rõ ràng.
 4. Khi cần replay từng thay đổi HP hoặc animation phức tạp, bổ sung snapshot/event đầy đủ hơn trên nền presentation events hiện có.
 5. Nếu effect handlers tăng nhiều, tách thành registry/module theo effect; tránh biến JSON thành nơi thực thi JavaScript tùy ý.

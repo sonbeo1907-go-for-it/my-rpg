@@ -1,4 +1,5 @@
 import { ownsCharacter, unlockCharacter } from './ownership.js';
+import { gearSlotCapacity, unlockDuplicateSlot } from './gear-slots.js';
 
 const STAT_KEYS = ['maxHp', 'maxMp', 'attack', 'magic', 'defense', 'resistance', 'speed'];
 const positiveInt = value => Number.isSafeInteger(value) && value > 0;
@@ -11,6 +12,7 @@ export function validateEconomyContent(content) {
   for (const key of ['victoryCoins', 'singlePullCost', 'tenPullCost', 'duplicateShards', 'recruitCost']) {
     if (!positiveInt(rules[key])) errors.push(`economy: invalid ${key}`);
   }
+  if (!positiveInt(rules.baseGearSlots) || !positiveInt(rules.maxGearSlots) || rules.maxGearSlots < rules.baseGearSlots) errors.push('economy: invalid gear slot limits');
   if (!Array.isArray(rules.starterCharacters) || !rules.starterCharacters.length
     || new Set(rules.starterCharacters).size !== rules.starterCharacters.length
     || rules.starterCharacters.some(id => !Object.hasOwn(content.characters, id))) errors.push('economy: invalid starterCharacters');
@@ -90,9 +92,13 @@ export function pullGacha(campaign, content, bannerId, count, random = Math.rand
     if (character) {
       const characterId = banner.characterPool[Math.floor(roll(random) * banner.characterPool.length)];
       const duplicate = ownsCharacter(next, characterId);
-      if (duplicate) next.recruitmentShards = checkedAdd(next.recruitmentShards, rules.duplicateShards);
+      let slotUnlocked = false;
+      if (duplicate) {
+        next.recruitmentShards = checkedAdd(next.recruitmentShards, rules.duplicateShards);
+        slotUnlocked = unlockDuplicateSlot(next, content, characterId);
+      }
       else unlockCharacter(next, content, characterId);
-      results.push({ kind: 'character', characterId, duplicate, shards: duplicate ? rules.duplicateShards : 0 });
+      results.push({ kind: 'character', characterId, duplicate, shards: duplicate ? rules.duplicateShards : 0, slotUnlocked, gearSlots: gearSlotCapacity(next, content, characterId) });
     } else {
       const type = content.gearTypes[weighted(banner.gearRates, random).typeId];
       const pool = [...rules.gearStats];

@@ -1,5 +1,6 @@
 import { economyRules, pullGacha, recruitCharacter } from '../core/economy.js';
 import { ownsCharacter } from '../core/ownership.js';
+import { gearSlotCapacity } from '../core/gear-slots.js';
 
 const make = (tag, className = '', text = '') => {
   const node = document.createElement(tag);
@@ -30,19 +31,20 @@ export function createGachaMenu({ content, getCampaign, commit, onChange }) {
     $('pull-ten').disabled = busy || campaign.coins < rules.tenPullCost;
     $('gacha-help').textContent = `Thắng một trận nhận ${rules.victoryCoins} coin. Mỗi lượt độc lập: ${percent(banner.gearWeight / total)} gear, ${percent(banner.characterWeight / total)} nhân vật. Quay 10 không bảo đảm nhân vật. Kết quả tự động được lưu.`;
     const rates = $('banner-rates');
-    rates.replaceChildren(make('p', '', `Mỗi nhân vật trong pool: ${percent(banner.characterWeight / total / banner.characterPool.length)} mỗi lượt. Nhân vật trùng nhận ${rules.duplicateShards} mảnh.`));
+    rates.replaceChildren(make('p', '', `Mỗi nhân vật trong pool: ${percent(banner.characterWeight / total / banner.characterPool.length)} mỗi lượt. Nhân vật có ${rules.baseGearSlots} ô gear mặc định. Mỗi bản trùng mở thêm 1 ô cho chính nhân vật đó, tối đa ${rules.maxGearSlots} ô; vẫn nhận ${rules.duplicateShards} mảnh kể cả khi đủ ô.`));
     const weight = banner.gearRates.reduce((sum, item) => sum + item.weight, 0);
     for (const item of banner.gearRates) {
       const type = content.gearTypes[item.typeId];
       rates.append(make('p', '', `${type.name}: ${percent(item.weight / weight)} trong nhánh gear · ${percent(banner.gearWeight / total * item.weight / weight)} mỗi lượt · +${type.points} điểm × ${type.statCount} chỉ số.`));
     }
     rates.append(make('p', '', `Chỉ số chọn đều, không trùng trong cùng món. Mỗi điểm: ${rules.gearStats.map(item => `${item.label} +${item.scale}`).join(', ')}.`));
-    $('banner-pool').replaceChildren(...banner.characterPool.map(id => make('span', 'badge', `${content.characters[id].name} · ${ownsCharacter(campaign, id) ? 'Đã sở hữu' : 'Chưa sở hữu'}`)));
+    $('banner-pool').replaceChildren(...banner.characterPool.map(id => make('span', 'badge', `${content.characters[id].name} · ${ownsCharacter(campaign, id) ? `${gearSlotCapacity(campaign, content, id)}/${rules.maxGearSlots} ô gear` : 'Chưa sở hữu'}`)));
     $('gacha-results').replaceChildren(...results.map(result => {
       const card = make('article', `gacha-result ${result.kind}`);
       if (result.kind === 'character') {
         const actor = content.characters[result.characterId];
         card.append(make('span', 'element', actor.element), make('h4', '', actor.name), make('p', '', result.duplicate ? `Đã sở hữu · +${result.shards} mảnh` : 'Đồng đội mới · Đã mở khóa'), make('small', '', actor.role));
+        card.append(make('p', '', result.slotUnlocked ? `Đã mở ô gear ${result.gearSlots}/${rules.maxGearSlots}` : result.duplicate ? `Đã đạt ${rules.maxGearSlots} ô gear` : `${result.gearSlots} ô gear mặc định`));
       } else {
         card.append(make('span', 'element', 'GEAR'), make('h4', '', content.gearTypes[result.gear.typeId].name), make('p', '', Object.entries(result.gear.stats).map(([key, value]) => `${rules.gearStats.find(item => item.stat === key).label} +${value}`).join(' · ')), make('small', '', 'Đã lưu vào bộ sưu tập gear'));
       }
@@ -57,7 +59,7 @@ export function createGachaMenu({ content, getCampaign, commit, onChange }) {
     $('recruit-character').disabled = busy || !locked.length;
     $('recruit').disabled = busy || !locked.length || campaign.recruitmentShards < rules.recruitCost;
     $('recruit-help').textContent = `${campaign.recruitmentShards} mảnh hiện có · Đổi ${rules.recruitCost} mảnh để chọn một nhân vật chưa sở hữu.`;
-    $('gear-summary').textContent = `Đã lưu ${campaign.gear.length} gear. Gear chưa cộng chỉ số; túi đồ và equip sẽ được bổ sung ở bước tiếp theo.`;
+    $('gear-summary').textContent = `Đã lưu ${campaign.gear.length} gear. Mở trang Túi đồ để trang bị cho đồng đội.`;
   }
 
   function transact(operation, message) {

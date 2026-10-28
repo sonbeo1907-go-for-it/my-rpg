@@ -5,6 +5,7 @@ import { isValidParty } from './party.js';
 import { damageMultiplier, supportAmount, EMERGENCY_HP_THRESHOLD, effectiveStat } from './combat-math.js';
 import { canTriggerFollowUp } from './follow-up.js';
 import { assertOwnedParty } from './ownership.js';
+import { assertValidEquipment } from './equipment.js';
 
 const living = actor => actor.hp > 0;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -14,6 +15,7 @@ export function createBattle(content, campaign, encounterId, random = seededRand
   if (!encounter) throw new Error(`Unknown encounter ${encounterId}`);
   if (!isValidParty(campaign.party, content.characters)) throw new Error('Invalid party');
   assertOwnedParty(campaign);
+  assertValidEquipment(campaign, content);
   const makeActor = (definition, team, id) => ({
     ...structuredClone(definition), definitionId: definition.id, id, team,
     hp: definition.stats.maxHp, mp: definition.stats.maxMp, shield: 0, shieldSourceId: null,

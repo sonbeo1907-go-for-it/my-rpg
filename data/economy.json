@@ -13,6 +13,8 @@
     "singlePullCost": 100,
     "tenPullCost": 1000,
     "duplicateShards": 10,
+    "baseGearSlots": 3,
+    "maxGearSlots": 6,
     "recruitCost": 100,
     "gearStats": [
       {

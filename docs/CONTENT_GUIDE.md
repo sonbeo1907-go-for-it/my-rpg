@@ -184,6 +184,8 @@ Khi nguyên tố đòn đánh trùng một phần tử, mục tiêu nhận thêm
 - Không dùng bản sao nhân vật để tăng chỉ số. Trùng cộng mảnh; chỉ mở nhân vật còn khóa trong pool khi đổi đủ mảnh.
 - Mở thêm nhân vật bằng truyện về sau có thể gọi `unlockCharacter(campaign, content, id)`; hàm không cấp trùng quyền sở hữu. Preview không đồng nghĩa đã sở hữu.
 - Kiểm tra cả định nghĩa và save khi đổi kinh tế; ID hoặc giá trị gear đã tồn tại cần migration tương ứng.
+- Save v3: `campaign.equipment` ánh xạ character ID → mảng gear ID/null giữ vị trí từng ô. `extraGearSlots` ánh xạ character ID → số ô mở thêm (0–3). `baseGearSlots`/`maxGearSlots` trong economy mặc định 3/6. Mỗi dupe mở 1 ô cho chính nhân vật đó đến trần, vẫn cộng mảnh. Dùng `equipGear`/`unequipGear` với `slot` (index 0-based, mặc định 0) và commit sau khi lưu. Một instance không thể xuất hiện ở nhiều ô; chưa có giới hạn nghề/nguyên tố.
+- Gear cộng flat trước nội tại và buff %. Nếu thêm loại chỉ số gear mới, cập nhật validator, resolver và bảng so sánh; không thêm modifier vào dữ liệu nhân vật mỗi lần equip. Không sửa trực tiếp actor của trận đang diễn ra.
 
 ## Quy trình sửa nội dung
 

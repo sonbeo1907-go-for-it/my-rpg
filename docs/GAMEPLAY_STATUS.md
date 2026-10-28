@@ -2,7 +2,7 @@
 
 Vai trò và nguyên tố giữ theo yêu cầu. Chi tiết kỹ năng dưới đây là triển khai thử nghiệm để phát triển tiếp, không xác định thêm canon của nhân vật.
 
-Save v2 chỉ mở sẵn Arthur, Iris, Takeshi, Elaine, Garrek và Fiona. Các nhân vật khác vẫn có preview, mở qua banner hoặc đổi mảnh. Thắng trận nhận 100 coin, quay 100 coin/lượt hoặc 1.000 coin/10 lượt (90% gear, 10% nhân vật, không bảo hiểm). Gear chỉ được lưu, chưa equip/cộng chỉ số. Migration v1 giữ truyện và cấp bù coin theo chiến thắng cũ, khóa các nhân vật ngoài sáu starter.
+Save v3 chỉ mở sẵn Arthur, Iris, Takeshi, Elaine, Garrek và Fiona. Các nhân vật khác vẫn có preview, mở qua banner hoặc đổi mảnh. Thắng trận nhận 100 coin, quay 100 coin/lượt hoặc 1.000 coin/10 lượt (90% gear, 10% nhân vật, không bảo hiểm). Mỗi người có 3 ô gear; mỗi dupe mở thêm 1 ô cho chính người đó, tối đa 6, vẫn nhận mảnh. Túi đồ cho chọn ô để equip/tháo/chuyển. Tổng chỉ số cộng trước nội tại/buff %, áp dụng vào preview và trận mới. v1 giữ truyện và cấp bù coin chiến thắng cũ; v2 giữ món đang mặc ở ô đầu tiên. Không có lịch sử dupe cũ theo người để cấp bù ô.
 
 | Nhân vật | Nguyên tố / vai trò | Đã hoạt động |
 |---|---|---|

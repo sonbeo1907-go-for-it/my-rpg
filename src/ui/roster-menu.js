@@ -2,6 +2,9 @@ import { ELEMENTS, ROLE_GROUPS } from '../core/content.js';
 import { partySlots, assignPartySlot, removePartySlot } from '../core/party.js';
 import { resolveCharacter } from '../core/progression.js';
 import { ownsCharacter } from '../core/ownership.js';
+import { equippedGear } from '../core/equipment.js';
+import { gearSlotCapacity } from '../core/gear-slots.js';
+import { gearName, gearDescription } from './inventory-menu.js';
 import { basicAbility, DEFEND } from '../core/battle.js';
 import { skillDescription, skillCost, passiveDescription, TARGET_NAMES, skillScaling, skillPreviewOptions } from './skill-presentation.js';
 
@@ -21,7 +24,7 @@ function portrait(actor) {
 
 const searchable = text => text.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd');
 
-export function createRosterMenu({ content, getCampaign, onChange }) {
+export function createRosterMenu({ content, getCampaign, onChange, onPreviewChange = () => {}, onOpenInventory }) {
   const $ = id => document.getElementById(id);
   let selectedSlot = 0;
   let previewId = getCampaign().party.find(Boolean);
@@ -132,7 +135,8 @@ export function createRosterMenu({ content, getCampaign, onChange }) {
     for (const [key, name] of Object.entries({ maxHp: 'HP', maxMp: 'MP', attack: 'ATK', magic: 'MAG', defense: 'DEF', resistance: 'RES', speed: 'SPD' })) {
       const item = make('span', '', `${name} `);
       item.append(make('b', '', new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 }).format(actor.stats[key])));
-      if (actor.baseStats?.[key] !== undefined && actor.baseStats[key] !== actor.stats[key]) item.append(make('small', 'stat-base', ` (${actor.baseStats[key]} cơ bản)`));
+      if (actor.gearBonuses?.[key]) item.append(make('small', 'stat-base', ` (+${actor.gearBonuses[key]} gear)`));
+      if (actor.baseStats?.[key] !== undefined && actor.baseStats[key] !== actor.stats[key]) item.append(make('small', 'stat-base', ` (${actor.baseStats[key]} trước nội tại)`));
       stats.append(item);
     }
     const traits = make('div', 'preview-traits');
@@ -152,8 +156,17 @@ export function createRosterMenu({ content, getCampaign, onChange }) {
     if (actor.passive?.followUpAbility) skills.append(skillCard(content.abilities[actor.passive.followUpAbility], actor));
     const back = make('button', 'back-to-roster', '↑ Trở lại danh sách nhân vật');
     back.addEventListener('click', () => { $('character-menu').scrollIntoView({ block: 'start', behavior: 'smooth' }); $('roster-search').focus({ preventScroll: true }); });
-    $('preview-details').replaceChildren(back, header, actions, stats, traits,
+    const equipment = make('div', 'character-equipment');
+    const gear = equippedGear(campaign, previewId);
+    equipment.append(make('strong', '', `Trang bị: ${gear.length}/${gearSlotCapacity(campaign, content, previewId)} ô đang dùng · `), make('span', '', gear.length ? gear.map(item => `${gearName(item, content)} (${gearDescription(item, content)})`).join(' / ') : 'Chưa trang bị'));
+    const openInventory = make('button', '', 'Mở túi đồ');
+    openInventory.id = 'open-inventory';
+    openInventory.disabled = !owned;
+    openInventory.addEventListener('click', () => onOpenInventory());
+    equipment.append(openInventory);
+    $('preview-details').replaceChildren(back, header, actions, stats, equipment, traits,
       make('p', 'preview-note', 'Hệ số theo kỹ năng hiện có. Giá trị hồi/khiên dùng chỉ số chuẩn bị; hồi thực tế giới hạn bởi HP thiếu. Sát thương còn phụ thuộc phòng thủ, nguyên tố và hiệu ứng trong trận.'), skills);
+    onPreviewChange(previewId);
   }
 
   function skillCard(skill, actor) {
@@ -206,5 +219,5 @@ export function createRosterMenu({ content, getCampaign, onChange }) {
     $('roster-search').value = ''; $('roster-element').value = ''; $('roster-role').value = ''; $('roster-ownership').value = '';
     renderRoster(); $('roster-search').focus();
   });
-  return { render };
+  return { render, getPreviewId: () => previewId };
 }

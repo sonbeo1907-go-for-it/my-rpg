@@ -6,11 +6,13 @@ import { skillDescription, skillCost } from './skill-presentation.js';
 import { playBattleFeedback } from './battle-feedback.js';
 import { createRosterMenu } from './roster-menu.js';
 import { createGachaMenu } from './gacha-menu.js';
+import { createInventoryMenu } from './inventory-menu.js';
 import { claimBattleReward, economyRules } from '../core/economy.js';
+import { createSaveExport, parseSaveImport, MAX_SAVE_FILE_BYTES } from '../core/save-file.js';
 
 const $ = id => document.getElementById(id);
-const SAVE_KEY = 'northern-prisma.campaign.v2';
-const LEGACY_SAVE_KEY = 'northern-prisma.campaign.v1';
+const SAVE_KEY = 'northern-prisma.campaign.v3';
+const LEGACY_SAVE_KEYS = ['northern-prisma.campaign.v2', 'northern-prisma.campaign.v1'];
 const make = (tag, className = '', text = '') => {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -18,35 +20,44 @@ const make = (tag, className = '', text = '') => {
   return node;
 };
 const notify = message => { $('notice').textContent = message; };
-let content, campaign, battle = null, selectedAbility = null, reportedBattle = null, rosterMenu = null, gachaMenu = null, battleBusy = false;
+let content, campaign, battle = null, selectedAbility = null, reportedBattle = null, rosterMenu = null, gachaMenu = null, inventoryMenu = null, battleBusy = false;
 const persistCampaign = next => localStorage.setItem(SAVE_KEY, serializeCampaign(next));
-const readSave = () => localStorage.getItem(SAVE_KEY) ?? localStorage.getItem(LEGACY_SAVE_KEY);
+const readSave = () => [SAVE_KEY, ...LEGACY_SAVE_KEYS].map(key => localStorage.getItem(key)).find(value => value !== null) ?? null;
 function commitCampaign(next) {
   persistCampaign(next);
   campaign = next;
   renderCampaign();
 }
 
+function replaceCampaign(loaded) {
+  campaign = loaded; battle = null; selectedAbility = null; reportedBattle = null;
+  gachaMenu.clear();
+  $('allies').replaceChildren(); $('enemies').replaceChildren(); $('log').replaceChildren();
+  $('turn-order').textContent = ''; $('battle-result').textContent = ''; $('round').textContent = 'Chưa bắt đầu';
+  renderCampaign(); renderBattle(); showScreen('preparation');
+}
+
 function setBattleBusy(value) {
   battleBusy = value;
-  for (const id of ['start', 'load', 'preparation-nav', 'back-to-preparation', 'gacha-nav', 'claim-reward']) $(id).disabled = value;
+  for (const id of ['start', 'load', 'export-save', 'import-save', 'preparation-nav', 'inventory-nav', 'back-to-preparation', 'gacha-nav', 'claim-reward']) $(id).disabled = value;
   $('start').disabled = value || Boolean(battle?.outcome === 'victory' && !battle.rewardClaimed);
-  $('battle-nav').disabled = value || !battle;
+  $('battle-nav').disabled = value;
   $('battle-screen').setAttribute('aria-busy', String(value));
   renderCommands();
 }
 
 function showScreen(screen, focus = true) {
-  if (screen === 'battle' && !battle) screen = 'preparation';
-  for (const name of ['preparation', 'battle', 'gacha']) {
+  for (const name of ['preparation', 'inventory', 'battle', 'gacha']) {
     $(`${name}-screen`).hidden = name !== screen;
     $(`${name}-nav`).removeAttribute('aria-current');
   }
   $(`${screen}-nav`).setAttribute('aria-current', 'page');
-  $('battle-nav').disabled = battleBusy || !battle;
+  $('battle-nav').disabled = battleBusy;
+  if (screen === 'inventory') inventoryMenu.render();
+  if (screen === 'battle') renderBattle();
   if (screen === 'gacha') gachaMenu.render();
   if (focus) {
-    $(({ battle: 'battle-title', preparation: 'campaign-title', gacha: 'gacha-title' })[screen]).focus({ preventScroll: true });
+    $(({ battle: 'battle-page-title', preparation: 'campaign-title', inventory: 'inventory-title', gacha: 'gacha-title' })[screen]).focus({ preventScroll: true });
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
   if (screen === 'battle') $('log').scrollTop = $('log').scrollHeight;
@@ -63,6 +74,7 @@ function renderCampaign() {
     : 'Mốc truyện thử nghiệm: hoàn thành luyện kiếm để giảm tác dụng phụ của Ogre’s Bane và mở Giải phóng một phần.';
   $('progress').textContent = `${campaign.victories} chiến thắng`;
   $('coin-balance').textContent = `${new Intl.NumberFormat('vi-VN').format(campaign.coins)} coin`;
+  $('battle-party-summary').textContent = `Đội hình cho trận mới: ${campaign.party.filter(Boolean).map(id => content.characters[id].name).join(' · ')}. Thay đổi đội hình tại Chuẩn bị.`;
   gachaMenu?.render();
 }
 
@@ -131,8 +143,9 @@ function renderCommands() {
 
 function renderBattle() {
   $('claim-reward').hidden = !(battle?.outcome === 'victory' && !battle.rewardClaimed);
-  $('battle-nav').disabled = battleBusy || !battle;
-  $('battle-nav').textContent = battle?.outcome ? '02 / Kết quả trận' : '02 / Chiến đấu';
+  $('battle-nav').disabled = battleBusy;
+  $('battle-session').hidden = !battle;
+  $('battle-placeholder').hidden = Boolean(battle);
   $('empty-battle').hidden = Boolean(battle);
   if (!battle) { renderCommands(); return; }
   const actor = activeActor(battle);
@@ -183,13 +196,14 @@ async function init() {
   try {
     const saved = readSave();
     if (saved) {
-      const migrated = JSON.parse(saved).version === 1;
+      const oldVersion = JSON.parse(saved).version;
       campaign = deserializeCampaign(saved, content);
-      if (migrated) persistCampaign(campaign);
-      notify(migrated ? 'Đã chuyển save v1 sang v2: giữ tiến trình truyện, mở sáu nhân vật chính và cấp bù 100 coin mỗi chiến thắng cũ. Bản v1 vẫn được giữ.' : 'Đã tải tiến trình đã lưu.');
+      if (oldVersion < 3) persistCampaign(campaign);
+      notify(oldVersion === 1 ? 'Đã chuyển save v1 sang v3, giữ truyện và cấp bù coin chiến thắng. Mỗi người có 3 ô gear; bản cũ vẫn được giữ.' : oldVersion === 2 ? 'Đã chuyển save v2 sang v3: giữ tiến trình và gear đang mặc, mở 3 ô gear mỗi người. Bản cũ vẫn được giữ.' : 'Đã tải tiến trình đã lưu.');
     }
   } catch (error) { notify(`Không tải được save: ${error.message} Bản cũ chưa bị ghi đè.`); }
-  rosterMenu = createRosterMenu({ content, getCampaign: () => campaign, onChange: notify });
+  rosterMenu = createRosterMenu({ content, getCampaign: () => campaign, onChange: notify, onPreviewChange: () => inventoryMenu?.render(), onOpenInventory: () => showScreen('inventory') });
+  inventoryMenu = createInventoryMenu({ content, getCampaign: () => campaign, getCharacterId: () => rosterMenu.getPreviewId(), commit: commitCampaign, onChange: notify, onChooseCharacter: () => { showScreen('preparation'); $('roster-title').scrollIntoView({ block: 'start', behavior: 'smooth' }); $('roster-title').focus({ preventScroll: true }); } });
   gachaMenu = createGachaMenu({ content, getCampaign: () => campaign, commit: commitCampaign, onChange: notify });
   for (const encounter of Object.values(content.encounters)) $('encounter').append(new Option(encounter.name, encounter.id));
   const describeEncounter = () => { $('encounter-description').textContent = content.encounters[$('encounter').value].description; };
@@ -197,7 +211,8 @@ async function init() {
   describeEncounter();
   $('preparation-nav').addEventListener('click', () => showScreen('preparation'));
   $('back-to-preparation').addEventListener('click', () => showScreen('preparation'));
-  $('battle-nav').addEventListener('click', () => { renderBattle(); showScreen('battle'); });
+  $('battle-nav').addEventListener('click', () => showScreen('battle'));
+  $('inventory-nav').addEventListener('click', () => showScreen('inventory'));
   $('gacha-nav').addEventListener('click', () => showScreen('gacha'));
   $('claim-reward').addEventListener('click', async () => {
     if (battleBusy) return;
@@ -211,7 +226,7 @@ async function init() {
       setBattleBusy(true);
       battle = createBattle(content, campaign, $('encounter').value, seededRandom(20261027));
       selectedAbility = null;
-      renderBattle(); showScreen('battle');
+      showScreen('battle');
       notify('Trận đấu đã bắt đầu.');
       await playBattleFeedback(battle.events, $('battle-screen'));
       await advanceEnemies();
@@ -246,15 +261,61 @@ async function init() {
       if (!raw) { notify('Chưa có tiến trình đã lưu.'); return; }
       const loaded = deserializeCampaign(raw, content);
       if (battle && !battle.outcome && !window.confirm('Tải tiến trình sẽ kết thúc trận hiện tại. Tiếp tục?')) return;
-      campaign = loaded; battle = null; selectedAbility = null;
-      gachaMenu.clear();
-      $('allies').replaceChildren(); $('enemies').replaceChildren(); $('log').replaceChildren();
-      $('turn-order').textContent = ''; $('battle-result').textContent = ''; $('round').textContent = 'Chưa bắt đầu';
-      renderCampaign(); renderBattle(); showScreen('preparation'); notify('Đã tải tiến trình.');
+      replaceCampaign(loaded);
+      notify('Đã tải tiến trình.');
     } catch (error) { notify(`Không tải được: ${error.message}`); }
   });
+  $('export-save').addEventListener('click', () => {
+    if (battleBusy) return;
+    let url;
+    try {
+      const exported = createSaveExport(campaign, content);
+      url = URL.createObjectURL(new Blob([exported.text], { type: 'application/json;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = exported.filename;
+      document.body.append(link);
+      try { link.click(); } finally { link.remove(); }
+      notify('Đã xuất file save JSON. File gồm tiến trình hiện tại, coin, nhân vật, gear và trang bị; không gồm trận đang đánh.');
+    } catch (error) { notify(`Không xuất được save: ${error.message}`); }
+    finally { if (url) window.setTimeout(() => URL.revokeObjectURL(url), 1000); }
+  });
+  $('import-save').addEventListener('click', () => {
+    if (!battleBusy) $('import-save-file').click();
+  });
+  $('import-save-file').addEventListener('change', async () => {
+    const input = $('import-save-file');
+    const file = input.files?.[0];
+    input.value = ''; // Selecting the same file again must still fire change after failure/cancel.
+    if (!file || battleBusy) return;
+    let imported = false;
+    setBattleBusy(true);
+    $('preparation-screen').inert = true;
+    $('inventory-screen').inert = true;
+    $('gacha-screen').inert = true;
+    try {
+      if (file.size > MAX_SAVE_FILE_BYTES) throw new Error('File save vượt giới hạn 10 MB.');
+      const loaded = parseSaveImport(await file.text(), content);
+      const summary = `${loaded.victories} chiến thắng · ${loaded.coins} coin · ${loaded.unlockedCharacterIds.length} nhân vật · ${loaded.gear.length} gear.`;
+      if (!window.confirm(`Nhập save này sẽ THAY THẾ toàn bộ tiến trình hiện tại, không cộng dồn.\n${summary}${battle ? '\nTrận hiện tại sẽ được đóng.' : ''}\nTiếp tục?`)) {
+        notify('Đã hủy nhập save. Tiến trình hiện tại được giữ nguyên.');
+        return;
+      }
+      persistCampaign(loaded); // Failed writes preserve both the live campaign and current battle.
+      replaceCampaign(loaded);
+      imported = true;
+      notify('Đã nhập và lưu tiến trình. Đội hình, coin, nhân vật, gear và trang bị đã được thay thế bằng dữ liệu trong file.');
+    } catch (error) { notify(`Không nhập được save: ${error.message} Tiến trình hiện tại được giữ nguyên.`); }
+    finally {
+      $('preparation-screen').inert = false;
+      $('inventory-screen').inert = false;
+      $('gacha-screen').inert = false;
+      setBattleBusy(false);
+      if (imported) $('campaign-title').focus({ preventScroll: true });
+    }
+  });
   renderCampaign(); renderBattle(); showScreen('preparation', false);
-  for (const id of ['start', 'save', 'load', 'gacha-nav']) $(id).disabled = false;
+  for (const id of ['start', 'save', 'load', 'export-save', 'import-save', 'inventory-nav', 'battle-nav', 'gacha-nav']) $(id).disabled = false;
 }
 
 init().catch(error => { notify(`Không khởi tạo được: ${error.message}`); $('start').disabled = true; console.error(error); });

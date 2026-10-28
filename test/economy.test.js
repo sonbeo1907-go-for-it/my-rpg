@@ -13,9 +13,9 @@ const sequence = values => { let index = 0; return () => { assert.ok(index < val
 const funded = (coins = 1000) => Object.assign(createCampaign(content), { coins });
 const restore = campaign => deserializeCampaign(serializeCampaign(campaign), content);
 
-test('v2 starts with exactly six owned heroes; locked characters cannot enter a party or battle', () => {
+test('v3 starts with exactly six owned heroes; locked characters cannot enter a party or battle', () => {
   const campaign = createCampaign(content);
-  assert.equal(campaign.version, 2);
+  assert.equal(campaign.version, 3);
   assert.deepEqual(campaign.unlockedCharacterIds, ['arthur', 'iris', 'takeshi', 'elaine', 'garrek', 'fiona']);
   assert.equal(campaign.coins, 0);
   assert.equal(ownsCharacter(campaign, 'aurora'), false);
@@ -35,7 +35,7 @@ test('v1 migration grants old victory coins once, locks non-starters, preserves 
   old.party = ['lisbeth', 'arthur', null, 'aurora'];
   completeStoryEvent(old, content, 'arthur_completed_sword_training');
   const next = restore(old);
-  assert.equal(next.version, 2);
+  assert.equal(next.version, 3);
   assert.equal(next.coins, 400);
   assert.deepEqual(next.party, [null, 'arthur', null, null]);
   assert.equal(ownsCharacter(next, 'lisbeth'), false);
@@ -46,7 +46,7 @@ test('v1 migration grants old victory coins once, locks non-starters, preserves 
   assert.deepEqual(restore(old).party, createCampaign(content).party);
 });
 
-test('save v2 validates balances, ownership, gear rolls and unique instance IDs without leaking battle state', () => {
+test('save v3 validates balances, ownership, gear rolls and unique instance IDs without leaking battle state', () => {
   const good = pullGacha(funded(), content, 'standard', 1, sequence([0, .99, 0, 0])).campaign;
   assert.deepEqual(good.gear[0].stats, { maxHp: 10, maxMp: 4 });
   good.battle = { hp: 5 };
@@ -180,6 +180,8 @@ test('insufficient funds, invalid commands or broken RNG never modify the origin
 test('economy content validation catches invalid prices, pools, weights and gear definitions', () => {
   for (const corrupt of [
     value => { value.economy.default.singlePullCost = 0; },
+    value => { value.economy.default.baseGearSlots = 0; },
+    value => { value.economy.default.maxGearSlots = 2; },
     value => { value.banners.standard.characterPool.push('unknown'); },
     value => { value.banners.standard.characterPool.push('arthur'); },
     value => { value.banners.standard.gearWeight = -90; },

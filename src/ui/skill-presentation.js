@@ -31,7 +31,7 @@ export function passiveDescription(actor, content) {
   if (!passive) return null;
   if (passive.type === 'stat_boost') {
     const names = { attack: 'ATK', magic: 'MAG', defense: 'DEF', resistance: 'RES', speed: 'SPD' };
-    return `${passive.name}: ${Object.entries(passive.modifiers).map(([key, amount]) => `${amount >= 0 ? '+' : '−'}${percent(Math.abs(amount))} ${names[key]} vĩnh viễn (${number(actor.baseStats?.[key] ?? actor.stats[key])} cơ bản → ${number(effectiveStat(actor, key))})`).join('; ')}. Buff trong trận cộng tỷ lệ trên chỉ số cơ bản.`;
+    return `${passive.name}: ${Object.entries(passive.modifiers).map(([key, amount]) => `${amount >= 0 ? '+' : '−'}${percent(Math.abs(amount))} ${names[key]} vĩnh viễn (${number(actor.baseStats?.[key] ?? actor.stats[key])} ${actor.gearBonuses?.[key] ? 'nền gồm gear' : 'cơ bản'} → ${number(effectiveStat(actor, key))})`).join('; ')}. Buff trong trận cộng tỷ lệ trên chỉ số nền${actor.gearBonuses ? ' gồm gear' : ''}.`;
   }
   if (passive.type === 'damage_reduction') return `Luôn giảm ${Math.round(passive.amount * 100)}% sát thương nhận.`;
   if (passive.type === 'shield_break_heal') return `Khi khiên do ${actor.name} tạo bị phá, hồi tối đa ${Math.round(actor.stats.magic * passive.multiplier)} HP cho người mang khiên nếu cả hai còn đứng vững.`;
