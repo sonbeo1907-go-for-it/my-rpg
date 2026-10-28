@@ -1,0 +1,6 @@
+[
+  {"id":"t1","name":"T1","points":1,"statCount":1},
+  {"id":"t2","name":"T2","points":3,"statCount":1},
+  {"id":"t3_focused","name":"T3 · Chuyên biệt","points":5,"statCount":1},
+  {"id":"t3_dual","name":"T3 · Đa dụng","points":2,"statCount":2}
+]

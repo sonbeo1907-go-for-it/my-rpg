@@ -1,0 +1,5 @@
+[
+  {"id":"goblin","name":"Goblin do thám","element":"plain","stats":{"maxHp":120,"maxMp":40,"attack":24,"magic":8,"defense":12,"resistance":12,"speed":14},"weaknesses":["plain","fire","water","earth","wind","thunder","light","dark"],"abilities":["enemy.slash"]},
+  {"id":"elder_frog","name":"Elder Frog","element":"water","stats":{"maxHp":250,"maxMp":70,"attack":30,"magic":25,"defense":23,"resistance":20,"speed":12},"weaknesses":["fire"],"abilities":["enemy.splash","enemy.double_hit"]},
+  {"id":"ogre_underling","name":"Thuộc hạ Ogre King","element":"earth","stats":{"maxHp":600,"maxMp":100,"attack":43,"magic":20,"defense":27,"resistance":22,"speed":15},"weaknesses":["light","dark"],"abilities":["enemy.smash","enemy.quake"]}
+]

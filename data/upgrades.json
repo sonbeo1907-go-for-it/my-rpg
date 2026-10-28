@@ -1,0 +1,10 @@
+[
+  {
+    "id":"arthur.control_training","characterId":"arthur","name":"Kiểm soát Ogre’s Bane","order":10,
+    "requires":{"storyFlag":"arthur_completed_sword_training"},
+    "changes":[
+      {"type":"replace_ability","from":"arthur.ogres_bane","to":"arthur.ogres_bane_controlled"},
+      {"type":"unlock_ability","ability":"arthur.partial_release"}
+    ]
+  }
+]

@@ -1,0 +1,444 @@
+[
+  {
+    "id": "arthur",
+    "name": "Arthur",
+    "title": "Người hùng được chọn",
+    "element": "light",
+    "role": "DPS vật lí",
+    "description": "Tích Cộng hưởng rồi giải phóng Ogre’s Bane. Mốc truyện thay đổi cách điều khiển sức mạnh.",
+    "stats": {
+      "maxHp": 190,
+      "maxMp": 40,
+      "attack": 34,
+      "magic": 12,
+      "defense": 20,
+      "resistance": 16,
+      "speed": 16
+    },
+    "resources": {
+      "resonance": {
+        "name": "Cộng hưởng",
+        "max": 3
+      }
+    },
+    "abilities": [
+      "arthur.light_slash",
+      "arthur.release",
+      "arthur.ogres_bane"
+    ],
+    "roleGroup": "physical_dps"
+  },
+  {
+    "id": "iris",
+    "name": "Iris",
+    "title": "Nhà nghiên cứu thực địa",
+    "element": "plain",
+    "role": "Hỗ trợ tấn công",
+    "basicDamageType": "magical",
+    "description": "Cường hóa đồng đội, chuẩn bị cửa sổ dồn sát thương. Không hồi máu hoặc giảm giáp địch.",
+    "stats": {
+      "maxHp": 135,
+      "maxMp": 90,
+      "attack": 10,
+      "magic": 26,
+      "defense": 12,
+      "resistance": 24,
+      "speed": 23
+    },
+    "resources": {
+      "data": {
+        "name": "Dữ liệu",
+        "max": 3
+      }
+    },
+    "abilities": [
+      "iris.formula",
+      "iris.calibrate",
+      "iris.assault"
+    ],
+    "roleGroup": "offensive_support"
+  },
+  {
+    "id": "takeshi",
+    "name": "Takeshi",
+    "title": "Kẻ thách đấu",
+    "element": "wind",
+    "role": "DPS né / phản công",
+    "description": "Chủ động vào thế né, phản công tối đa một lần mỗi vòng. Không né được phép thuật.",
+    "stats": {
+      "maxHp": 155,
+      "maxMp": 45,
+      "attack": 33,
+      "magic": 10,
+      "defense": 14,
+      "resistance": 15,
+      "speed": 26
+    },
+    "resources": {
+      "opening": {
+        "name": "Sơ hở",
+        "max": 3
+      }
+    },
+    "passive": {
+      "type": "dodge_counter",
+      "resource": "opening"
+    },
+    "abilities": [
+      "takeshi.stance",
+      "takeshi.slash",
+      "takeshi.riposte"
+    ],
+    "roleGroup": "physical_dps"
+  },
+  {
+    "id": "fiona",
+    "name": "Fiona",
+    "title": "Original Prisma",
+    "element": "dark",
+    "role": "DPS ma pháp",
+    "basicDamageType": "magical",
+    "description": "Gieo mảnh Prisma trên địch, rồi kích nổ. Mỗi mục tiêu giữ mảnh riêng.",
+    "stats": {
+      "maxHp": 130,
+      "maxMp": 100,
+      "attack": 9,
+      "magic": 38,
+      "defense": 11,
+      "resistance": 25,
+      "speed": 18
+    },
+    "abilities": [
+      "fiona.shard",
+      "fiona.refraction",
+      "fiona.collapse"
+    ],
+    "roleGroup": "magical_dps"
+  },
+  {
+    "id": "elaine",
+    "name": "Elaine",
+    "title": "Người chữa lành",
+    "element": "water",
+    "role": "Hỗ trợ phòng thủ",
+    "basicDamageType": "magical",
+    "description": "Phòng ngừa bằng khiên và kháng phép. Khiên bị phá hồi một lượng HP nhỏ nếu Elaine còn đứng vững.",
+    "stats": {
+      "maxHp": 145,
+      "maxMp": 100,
+      "attack": 9,
+      "magic": 30,
+      "defense": 13,
+      "resistance": 28,
+      "speed": 20
+    },
+    "passive": {
+      "type": "shield_break_heal",
+      "multiplier": 0.35
+    },
+    "abilities": [
+      "elaine.shield",
+      "elaine.veil",
+      "elaine.sanctuary"
+    ],
+    "roleGroup": "defensive_support"
+  },
+  {
+    "id": "garrek",
+    "name": "Garrek",
+    "title": "Lá chắn của làng",
+    "element": "earth",
+    "role": "Tank bảo vệ cá nhân",
+    "description": "Nhận đòn đơn mục tiêu thay một đồng đội. Không thể nhận thay đòn diện rộng.",
+    "stats": {
+      "maxHp": 300,
+      "maxMp": 45,
+      "attack": 21,
+      "magic": 10,
+      "defense": 34,
+      "resistance": 22,
+      "speed": 11
+    },
+    "passive": {
+      "type": "damage_reduction",
+      "amount": 0.12
+    },
+    "abilities": [
+      "garrek.cover",
+      "garrek.fortress",
+      "garrek.resolve"
+    ],
+    "roleGroup": "tank"
+  },
+  {
+    "id": "dain",
+    "name": "Dain",
+    "title": "Đấu sĩ đại kiếm",
+    "element": "plain",
+    "role": "Đấu sĩ",
+    "description": "Gồng mình tích Quyết tâm khi chịu đòn, sau đó tung trọng kích.",
+    "stats": {
+      "maxHp": 235,
+      "maxMp": 35,
+      "attack": 35,
+      "magic": 8,
+      "defense": 25,
+      "resistance": 15,
+      "speed": 13
+    },
+    "resources": {
+      "resolve": {
+        "name": "Quyết tâm",
+        "max": 3
+      }
+    },
+    "abilities": [
+      "dain.strike",
+      "dain.brace",
+      "dain.crush"
+    ],
+    "roleGroup": "fighter"
+  },
+  {
+    "id": "rowan",
+    "name": "Rowan",
+    "title": "Cung thủ",
+    "element": "wind",
+    "role": "DPS vật lí tầm xa",
+    "description": "Dành lượt ngắm, sau đó bắn xuyên giáp. Có liên xạ để xử lí nhóm địch.",
+    "stats": {
+      "maxHp": 150,
+      "maxMp": 45,
+      "attack": 32,
+      "magic": 9,
+      "defense": 14,
+      "resistance": 17,
+      "speed": 24
+    },
+    "resources": {
+      "aim": {
+        "name": "Điểm ngắm",
+        "max": 2
+      }
+    },
+    "abilities": [
+      "rowan.aim",
+      "rowan.pierce",
+      "rowan.volley"
+    ],
+    "roleGroup": "physical_dps"
+  },
+  {
+    "id": "freya",
+    "name": "Freya",
+    "title": "Pháp sư lửa",
+    "element": "fire",
+    "role": "DPS ma pháp diện rộng",
+    "basicDamageType": "magical",
+    "description": "Tích Nhiệt bằng Hỏa cầu, xả Nhiệt thành Biển lửa hoặc điều hòa để hồi MP.",
+    "stats": {
+      "maxHp": 140,
+      "maxMp": 95,
+      "attack": 9,
+      "magic": 36,
+      "defense": 12,
+      "resistance": 25,
+      "speed": 17
+    },
+    "resources": {
+      "heat": {
+        "name": "Nhiệt",
+        "max": 3
+      }
+    },
+    "abilities": [
+      "freya.fireball",
+      "freya.inferno",
+      "freya.cool"
+    ],
+    "roleGroup": "magical_dps"
+  },
+  {
+    "id": "arden",
+    "name": "Arden",
+    "title": "Dược sư",
+    "element": "earth",
+    "role": "Hỗ trợ duy trì",
+    "basicDamageType": "magical",
+    "description": "Dược liệu hồi phục theo lượt, tăng phòng thủ. Cứu nguy tức thời kém hơn Armie.",
+    "stats": {
+      "maxHp": 165,
+      "maxMp": 80,
+      "attack": 12,
+      "magic": 25,
+      "defense": 20,
+      "resistance": 22,
+      "speed": 15
+    },
+    "abilities": [
+      "arden.poultice",
+      "arden.tonic",
+      "arden.garden"
+    ],
+    "roleGroup": "defensive_support"
+  },
+  {
+    "id": "rhett",
+    "name": "Rhett",
+    "title": "Ka-Boom!",
+    "element": "thunder",
+    "role": "DPS vật lí thiết bị",
+    "description": "Nạp Điện tích rồi xả qua vũ khí. Sát thương Thunder vẫn tính theo ATK và DEF vật lí.",
+    "stats": {
+      "maxHp": 160,
+      "maxMp": 45,
+      "attack": 36,
+      "magic": 10,
+      "defense": 16,
+      "resistance": 15,
+      "speed": 19
+    },
+    "resources": {
+      "charge": {
+        "name": "Điện tích",
+        "max": 3
+      }
+    },
+    "abilities": [
+      "rhett.charge",
+      "rhett.shot",
+      "rhett.overload"
+    ],
+    "roleGroup": "physical_dps"
+  },
+  {
+    "id": "galliard",
+    "name": "Galliard",
+    "title": "Khiên sắt",
+    "element": "water",
+    "role": "Tank giữ đội hình",
+    "description": "Thu hút đòn đơn mục tiêu và giảm sát thương cả đội. Không nhận đòn thay như Garrek.",
+    "stats": {
+      "maxHp": 280,
+      "maxMp": 60,
+      "attack": 23,
+      "magic": 12,
+      "defense": 30,
+      "resistance": 26,
+      "speed": 10
+    },
+    "abilities": [
+      "galliard.taunt",
+      "galliard.wall",
+      "galliard.hold"
+    ],
+    "roleGroup": "tank"
+  },
+  {
+    "id": "armie",
+    "name": "Armie",
+    "title": "Y tá",
+    "element": "water",
+    "role": "Hỗ trợ cứu chữa",
+    "basicDamageType": "magical",
+    "description": "Hồi HP tức thời, giải hiệu ứng bất lợi, cấp cứu người bị thương nặng.",
+    "stats": {
+      "maxHp": 150,
+      "maxMp": 100,
+      "attack": 9,
+      "magic": 32,
+      "defense": 14,
+      "resistance": 25,
+      "speed": 21
+    },
+    "abilities": [
+      "armie.first_aid",
+      "armie.treatment",
+      "armie.emergency"
+    ],
+    "roleGroup": "defensive_support"
+  },
+  {
+    "id": "fran",
+    "name": "Fran",
+    "title": "Phù thủy đêm sao",
+    "element": "dark",
+    "role": "Hỗ trợ phá phòng thủ",
+    "basicDamageType": "magical",
+    "description": "Giảm phòng thủ vật lí hoặc ma pháp của địch. Không tăng sức tấn công đồng đội.",
+    "stats": {
+      "maxHp": 135,
+      "maxMp": 95,
+      "attack": 8,
+      "magic": 29,
+      "defense": 12,
+      "resistance": 27,
+      "speed": 22
+    },
+    "abilities": [
+      "fran.erode",
+      "fran.fracture",
+      "fran.night"
+    ],
+    "roleGroup": "offensive_support"
+  },
+  {
+    "id": "aurora",
+    "name": "Aurora",
+    "title": "Pháp sư sấm sét",
+    "affiliation": "Magic Academy",
+    "element": "thunder",
+    "role": "Hỗ trợ tấn công / Sub DPS",
+    "roleGroup": "offensive_support",
+    "secondaryRoleGroups": ["magical_dps"],
+    "basicDamageType": "magical",
+    "description": "Pháp sư vừa tốt nghiệp Magic Academy, hỗ trợ đội phép bằng tăng MAG, đánh bồi và phục hồi MP. Tích Lôi ấn khi đồng đội khác gây sát thương phép đơn mục tiêu để tiếp sức cả đội ở đầu lượt.",
+    "stats": {
+      "maxHp": 140,
+      "maxMp": 100,
+      "attack": 10,
+      "magic": 28,
+      "defense": 13,
+      "resistance": 24,
+      "speed": 19
+    },
+    "resources": {
+      "thunder_charge": {"name": "Lôi ấn", "max": 2}
+    },
+    "passive": {
+      "type": "magic_followup_mp",
+      "name": "Mạch sấm",
+      "resource": "thunder_charge",
+      "threshold": 2,
+      "mpRestoreRatio": 0.2,
+      "followUpAbility": "aurora.follow_up"
+    },
+    "abilities": ["aurora.spark", "aurora.amplify", "aurora.storm"]
+  },
+  {
+    "id": "lisbeth",
+    "name": "Lisbeth Ranoc",
+    "title": "Thiên thần và ác quỷ",
+    "affiliation": "House Ranoc",
+    "element": "light",
+    "role": "DPS ma pháp đơn mục tiêu",
+    "roleGroup": "magical_dps",
+    "basicDamageType": "magical",
+    "description": "Tiểu thư nhà Ranoc, dòng quý tộc có tổ tiên lập khế ước với quỷ để có ma pháp vượt trội. Kiêu ngạo và tsundere, cô luôn phủ nhận sự quan tâm dành cho người khác. Tự cường hóa rồi dồn phép Light đơn mục tiêu, đổi lại HP thấp và hao nhiều MP.",
+    "stats": {
+      "maxHp": 110,
+      "maxMp": 90,
+      "attack": 8,
+      "magic": 42,
+      "defense": 10,
+      "resistance": 25,
+      "speed": 16
+    },
+    "passive": {
+      "type": "stat_boost",
+      "name": "Di sản khế ước",
+      "modifiers": {"magic": 0.2}
+    },
+    "abilities": ["lisbeth.pride", "lisbeth.lance", "lisbeth.judgment"]
+  }
+]

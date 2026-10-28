@@ -1,0 +1,13 @@
+{
+  "name": "northern-prisma-rpg",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Data-driven classic RPG foundation",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test"
+  }
+}

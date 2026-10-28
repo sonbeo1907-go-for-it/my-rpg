@@ -1,0 +1,4 @@
+[
+  {"id":"forest_patrol","name":"Tuần tra rừng biên giới","description":"Hai Goblin và một Elder Frog. Thử thay đổi đội hình để so sánh vai trò.","enemies":["goblin","goblin","elder_frog"]},
+  {"id":"ogre_trial","name":"Thử thách thuộc hạ Ogre","description":"Địch có đòn diện rộng; đỡ đòn thay và né tránh không giải quyết mọi tình huống.","enemies":["ogre_underling","goblin"]}
+]

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#131d27">
+  <title>Northern Prisma · RPG Prototype</title>
+  <link rel="stylesheet" href="/public/styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div><span class="eyebrow">THE VILLAGE IN THE NORTH</span><h1>Northern Prisma</h1><p>Một hành trình bắt đầu từ phía bắc.</p></div>
+    <div class="version">RPG FOUNDATION <b>0.1</b></div>
+  </header>
+  <main>
+    <nav class="screen-nav" aria-label="Màn hình trò chơi">
+      <button id="preparation-nav" class="screen-link" aria-current="page">01 / Chuẩn bị</button>
+      <button id="battle-nav" class="screen-link" disabled>02 / Chiến đấu</button>
+      <button id="gacha-nav" class="screen-link" disabled>03 / Chiêu mộ</button>
+      <span id="coin-balance" class="badge wallet" role="status">0 coin</span>
+    </nav>
+    <p id="notice" class="screen-notice" role="status" aria-live="polite">Sẵn sàng.</p>
+
+    <section id="preparation-screen" class="panel campaign-panel" aria-labelledby="campaign-title">
+      <div class="section-heading"><div><span class="eyebrow">01 / CHUẨN BỊ</span><h2 id="campaign-title" tabindex="-1">Đội hình & hành trình</h2></div><span id="progress" class="badge"></span></div>
+      <p class="muted">Chọn vị trí → Xem hồ sơ → Xác nhận xếp đội. Đội hình và mốc truyện áp dụng ở trận tiếp theo.</p>
+      <div id="party-select" class="party-select" role="group" aria-label="Bốn vị trí đội hình"></div>
+      <p id="selected-slot" class="selected-slot" aria-live="polite"></p>
+      <section id="character-menu" class="character-menu" aria-label="Menu chọn nhân vật và xem kỹ năng">
+        <aside class="roster-panel" aria-labelledby="roster-title">
+          <div class="section-heading"><div><span class="eyebrow">TÌM HIỂU ĐỒNG ĐỘI</span><h3 id="roster-title">Danh sách nhân vật</h3></div></div>
+          <label>Tìm nhân vật<input id="roster-search" type="search" placeholder="Tên, danh hiệu, vai trò…" autocomplete="off"></label>
+          <div class="roster-filters">
+            <label>Nguyên tố<select id="roster-element"><option value="">Tất cả hệ</option></select></label>
+            <label>Vai trò<select id="roster-role"><option value="">Tất cả vai trò</option></select></label>
+          </div>
+          <label>Sở hữu<select id="roster-ownership"><option value="">Tất cả nhân vật</option><option value="owned">Đã sở hữu</option><option value="locked">Chưa sở hữu</option></select></label>
+          <p id="roster-count" class="muted" role="status" aria-live="polite"></p>
+          <div id="roster-grid" class="roster-grid" role="group" aria-label="Nhân vật có thể xem và chọn"></div>
+          <div id="roster-empty" class="roster-empty" hidden><p>Không tìm thấy nhân vật phù hợp.</p><button id="clear-roster-filters">Xóa bộ lọc</button></div>
+          <p class="muted roster-hint">Chọn thẻ để xem kỹ năng. Đội hình chỉ đổi khi bạn xác nhận.</p>
+        </aside>
+        <section id="preview-details" class="preview-details" aria-label="Thông tin và kỹ năng nhân vật"></section>
+      </section>
+      <div class="setup-controls"><label>Cuộc chạm trán<select id="encounter"></select></label><button id="start" class="primary" disabled>Bắt đầu trận</button></div>
+      <p id="encounter-description" class="muted"></p>
+      <div class="story"><div><h3>Arthur · Kiểm soát Ogre’s Bane</h3><p id="story-description">Mốc truyện thử nghiệm: hoàn thành luyện kiếm để đổi nội tại kỹ năng và mở Giải phóng một phần.</p></div><button id="training" disabled>Hoàn thành luyện kiếm</button></div>
+      <div class="save-controls"><button id="save" disabled>Lưu tiến trình</button><button id="load" disabled>Tải tiến trình</button></div>
+    </section>
+
+    <section id="gacha-screen" class="panel" aria-labelledby="gacha-title" hidden>
+      <div class="section-heading"><div><span class="eyebrow">03 / CHIÊU MỘ</span><h2 id="gacha-title" tabindex="-1">Tiếng gọi Prisma</h2></div><span id="gacha-progress" class="badge"></span></div>
+      <p id="banner-description" class="muted"></p>
+      <label>Banner<select id="banner-select"></select></label>
+      <div class="gacha-actions"><button id="pull-one" class="primary" disabled>Quay 1 lần</button><button id="pull-ten" class="primary" disabled>Quay 10 lần</button></div>
+      <p id="gacha-help" class="muted"></p>
+      <details class="gacha-rates"><summary>Tỷ lệ và danh sách nhân vật</summary><div id="banner-rates"></div><div id="banner-pool" class="banner-pool"></div></details>
+      <section aria-labelledby="gacha-results-title"><h3 id="gacha-results-title">Kết quả lượt quay gần nhất</h3><p id="gacha-result-summary" role="status" aria-live="polite">Chưa quay trong phiên này.</p><div id="gacha-results" class="gacha-results"></div></section>
+      <section class="recruit-panel" aria-labelledby="recruit-title"><h3 id="recruit-title">Mảnh chiêu mộ</h3><p id="recruit-help" class="muted"></p><div class="setup-controls"><label>Chọn nhân vật chưa sở hữu<select id="recruit-character"></select></label><button id="recruit" disabled>Chiêu mộ</button></div></section>
+      <p id="gear-summary" class="muted"></p>
+    </section>
+
+    <section id="battle-screen" aria-label="Màn hình chiến đấu" hidden>
+    <div class="battle-toolbar"><button id="back-to-preparation">← Chuẩn bị đội hình</button><button id="claim-reward" hidden>Nhận thưởng chiến thắng</button><span class="muted">Bạn có thể trở lại chuẩn bị rồi tiếp tục trận hiện tại.</span></div>
+    <section class="battle-layout" aria-label="Màn thử chiến đấu">
+      <div class="panel battlefield">
+        <div class="section-heading"><div><span class="eyebrow">02 / CHIẾN ĐẤU</span><h2 id="battle-title" tabindex="-1">Rừng biên giới</h2></div><span id="round" class="badge">Chưa bắt đầu</span></div>
+        <div id="empty-battle" class="empty-battle"><span class="crest">✦</span><p>Chọn đồng đội và bắt đầu một cuộc chạm trán.</p><small>Light · Dark · Những mảnh Prisma</small></div>
+        <div id="enemies" class="combat-row enemy-row"></div>
+        <div id="turn-order" class="turn-order"></div>
+        <div id="allies" class="combat-row"></div>
+        <div id="battle-result" role="status" aria-live="polite"></div>
+      </div>
+      <aside class="panel command-panel">
+        <span class="eyebrow">03 / HÀNH ĐỘNG</span><h2 id="actor-title">Chờ xuất phát</h2>
+        <p id="actor-description" class="muted">Đánh thường không tốn MP. Phòng thủ giúp chờ thời điểm thuận lợi.</p>
+        <div id="abilities" class="abilities"></div>
+        <div id="target-controls" hidden><label>Mục tiêu<select id="target"></select></label><button id="execute" class="primary">Thực hiện</button></div>
+        <p id="action-help" class="muted"></p>
+      </aside>
+    </section>
+    <section class="panel log-panel" aria-labelledby="log-title"><div class="section-heading"><h2 id="log-title">Nhật ký chiến đấu</h2><span class="muted">Mới nhất ở cuối</span></div><ol id="log" aria-live="polite" aria-relevant="additions"></ol></section>
+    </section>
+    <footer>Bản mẫu kiểm tra hệ thống · Các chỉ số đang phục vụ thử nghiệm, chưa phải cân bằng cuối cùng.</footer>
+  </main>
+  <script type="module" src="/src/ui/main.js"></script>
+</body>
+</html>

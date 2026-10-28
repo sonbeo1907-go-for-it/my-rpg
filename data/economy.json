@@ -1,0 +1,55 @@
+[
+  {
+    "id": "default",
+    "starterCharacters": [
+      "arthur",
+      "iris",
+      "takeshi",
+      "elaine",
+      "garrek",
+      "fiona"
+    ],
+    "victoryCoins": 100,
+    "singlePullCost": 100,
+    "tenPullCost": 1000,
+    "duplicateShards": 10,
+    "recruitCost": 100,
+    "gearStats": [
+      {
+        "stat": "maxHp",
+        "label": "HP",
+        "scale": 5
+      },
+      {
+        "stat": "maxMp",
+        "label": "MP",
+        "scale": 2
+      },
+      {
+        "stat": "attack",
+        "label": "ATK",
+        "scale": 1
+      },
+      {
+        "stat": "magic",
+        "label": "MAG",
+        "scale": 1
+      },
+      {
+        "stat": "defense",
+        "label": "DEF",
+        "scale": 1
+      },
+      {
+        "stat": "resistance",
+        "label": "RES",
+        "scale": 1
+      },
+      {
+        "stat": "speed",
+        "label": "SPD",
+        "scale": 1
+      }
+    ]
+  }
+]
